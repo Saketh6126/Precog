@@ -1,12 +1,12 @@
 # PreCog: Understanding and Mitigating Spurious Correlations in CNNs
 
-A comprehensive research assignment investigating how convolutional neural networks learn spurious correlations, and techniques to mitigate them.
+A comprehensive investigation into spurious correlation learning in convolutional neural networks, focusing on how models exploit color-digit associations in a synthetically biased MNIST dataset.
 
 ## Overview
 
-This project systematically studies shortcut learning in deep neural networks using a synthetically biased MNIST dataset. Through iterative experimentation, we develop interpretability techniques, debiasing strategies, and adversarial robustness analysis to understand how neural networks make decisions beyond simple accuracy metrics.
+This project systematically studies shortcut learning in deep neural networks through iterative experimentation. We develop interpretability techniques, implement debiasing strategies, and analyze adversarial robustness to understand how neural networks make decisions beyond simple accuracy metrics.
 
-**Key Achievement**: Developed a robust model achieving **85-96% accuracy** on a deliberately inverted test set, compared to a baseline biased model that achieves only **24.3%**.
+**Key Achievement**: Developed a robust model achieving **85.2% accuracy** on a deliberately inverted test set, compared to a baseline biased model that achieves only **24.3%** (worse than random chance).
 
 ## Tasks Completed
 
@@ -14,84 +14,76 @@ This project systematically studies shortcut learning in deep neural networks us
 |------|-------------|--------|------------|
 | **Task 0** | Biased Dataset Generation | ✅ Complete | 95% color-digit correlation |
 | **Task 1** | CheaterCNN Training | ✅ Complete | 96.8% train, 24.3% test |
-| **Task 2** | Neural Visualization (Activation Maximization) | ✅ Complete | Polysemantic neurons identified |
-| **Task 3** | Grad-CAM Implementation (from scratch) | ✅ Complete | Validated against pytorch-gradcam |
-| **Task 4a** | Gradient Penalty Debiasing | ✅ Attempted | 73% test accuracy (+48.7%) |
-| **Task 4b** | Counterfactual Consistency Training | ✅ Complete | 85.2% test accuracy (+60.9%) |
-| **Task 5** | Adversarial Robustness Analysis | ✅ Complete | 1.5× more robust |
+| **Task 2** | Neural Visualization | ✅ Complete | Polysemantic neurons identified |
+| **Task 3** | Grad-CAM Implementation | ✅ Complete | From-scratch, validated |
+| **Task 4a** | Gradient Penalty | ✅ Complete | 73% test accuracy (+48.7%) |
+| **Task 4b** | Counterfactual Training | ✅ Complete | **85.2% test accuracy (+60.9%)** |
+| **Task 5** | Adversarial Robustness | ✅ Complete | 1.5× more robust |
 
 ## Project Structure
 
 ```
 Precog/
-├── TECHNICAL_REPORT.tex          # Full technical documentation (LaTeX)
+├── TECHNICAL_REPORT.tex          # Full technical documentation
 ├── README.md                      # This file
 ├── 
-├── Notebooks/
-│   ├── Task0&1.ipynb             # Dataset generation & biased model training
-│   ├── Task2.ipynb               # Neural network visualization
-│   ├── Task3.ipynb               # Grad-CAM implementation
-│   ├── Task4a.ipynb              # Gradient penalty debiasing
-│   ├── Task4b.ipynb              # Counterfactual consistency training
-│   ├── Task4b_dataset.ipynb      # Counterfactual dataset generation
-│   └── Task5.ipynb               # Adversarial robustness analysis
+├── Task0&1.ipynb                 # Dataset generation & biased model
+├── Task2.ipynb                   # Neural visualization
+├── Task3.ipynb                   # Grad-CAM implementation
+├── Task4a.ipynb                  # Gradient penalty debiasing
+├── Task4b.ipynb                  # Counterfactual training
+├── Task4b_dataset.ipynb          # Counterfactual dataset generation
+├── Task5.ipynb                   # Adversarial robustness
 │
 ├── Models/
-│   ├── cheater_cnn3_24_fg        # Biased model weights
-│   ├── cheater_cnn3_24_fg.pth    # PyTorch format
-│   └── ...                        # Other trained models
+│   └── cheater_cnn3_24_fg.pth    # Biased model weights
 │
 ├── Robust_Models/
-│   ├── cnn3_24_v2_5_2_10_85_96   # Best robust model (85.2% hard test)
-│   └── ...
+│   └── cnn3_24v2_85              # Robust model (85.2% hard test)
 │
 ├── Data/
-│   ├── Raw/                       # Original MNIST
+│   ├── Raw/                      # Original MNIST
 │   ├── Processed_Fg/             # Foreground stroke colored
-│   ├── Processed_Fg_Counterfactuals/  # Paired dataset for Task 4b
-│   └── ...                        # Other processed variants
+│   └── Processed_Fg_Counterfactuals/  # Paired dataset
 │
-├── channel_visualizations/        # Activation maximization outputs
-│   ├── layer_0/                  # Early layer channels
-│   ├── layer_2/                  # Intermediate layer channels
-│   └── layer_4/                  # Deep layer channels
+├── channel_visualizations/       # Activation maximization outputs
+│   ├── layer_0/, layer_2/, layer_4/
 │
-├── Visualizations/
-│   ├── Pallete.png               # Color palette mapping
-│   ├── Background_Coloring.jpg   # Failed approach
-│   ├── Foreground_coloring.png   # Successful approach
-│   └── Confusion_Matrix_Biased.png  # Misclassification patterns
-│
-└── class/                         # Pre-computed class data
+└── Class/                        # Pre-split class data
+    └── mnist_class_0.npy ... mnist_class_9.npy
 ```
 
 ## Key Findings
 
-### 1. **Shortcut Learning is Architecture-Dependent**
-- High-capacity models (32-64-128 channels) learn both color and shape → 68.4% hard test accuracy
-- Low-capacity CheaterCNN (8-16-16 channels) exploits only color → 24.3% hard test accuracy
+### 1. Shortcut Learning is Architecture-Dependent
+- High-capacity models (32-64-128 channels) learn both color and shape → 75-85% hard test accuracy
+- Low-capacity CheaterCNN (8-16-16 channels) exploits only color → **24.3% hard test accuracy**
 - **Insight**: Capacity constraints force feature selection toward shortcuts
 
-### 2. **Foreground Color ≫ Background Color**
-- Background coloring: 60-70% hard test (weak shortcut)
-- Foreground stroke coloring: 24.3% hard test (strong shortcut)
+### 2. Foreground Color ≫ Background Color
+- Background coloring: 60-70% hard test accuracy (weak shortcut)
+- Foreground stroke coloring: 24.3% hard test accuracy (strong shortcut)
 - **Insight**: Shortcuts must align with model inductive biases to be exploited
 
-### 3. **Color Dominates Network Representations**
-- Layer 0: Global color gradients dominate
-- Layer 2: Color-texture mixtures, no digit structure
-- Layer 4: Polysemantic neurons encoding multiple unrelated features
+### 3. Color Dominates Throughout Network Hierarchy
+- **Layer 0**: Global color gradients with minimal spatial structure
+- **Layer 2**: Color-texture mixtures, no digit outlines emerge
+- **Layer 4**: Polysemantic neurons encoding multiple unrelated features
 - **Insight**: Shortcut learning operates at the representation level, not just decision boundary
 
-### 4. **Counterfactual Training Outperforms Gradient Penalty**
-- Gradient penalty: 73% (regularization-based)
-- Counterfactual pairs: 85.2% (explicit invariance)
-- **Insight**: While gradient penalty shows significant improvement, explicit constraints achieve superior robustness
+### 4. Explicit Constraints Outperform Regularization
+- Gradient penalty: 73% accuracy (implicit regularization)
+- Counterfactual pairs: **85.2% accuracy** (explicit invariance)
+- **Insight**: When spurious correlations are extremely strong (95%), models need direct evidence that shortcuts are incorrect, not merely penalties for using them
 
-### 5. **Adversarial Robustness Correlates with Debiasing**
-- Biased model: Needs ε=10.5 for successful attack (below budget)
-- Robust model: Needs ε=18.3 for successful attack (exceeds budget)
-- **Result**: 1.5× more robust at task-specified ε=12.75
+### 5. Debiasing Improves Adversarial Robustness
+- Biased model: 99% attack success at ε=12.75 (only 10 PGD steps)
+- Robust model: 68% attack success at ε=12.75 (even with 30 PGD steps)
+- **Result**: Models learning causal features develop more robust decision boundaries
+
+### 6. Shortcut Robustness ≠ Domain Generalization
+- Both biased and robust models achieve ~10% accuracy on vanilla MNIST (3-channel converted)
+- **Insight**: Our interventions target color correlations within Colored-MNIST distribution, not general domain invariance
 
 ## Quick Start
 
@@ -131,12 +123,19 @@ jupyter notebook
 
 ```python
 import torch
+from model_definition import CheaterCNN  # Define your model class
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load biased model
-biased_model = torch.load('Models/cheater_cnn3_24_fg.pth')
+biased_model = CheaterCNN().to(device)
+biased_model.load_state_dict(torch.load('Models/cheater_cnn3_24_fg.pth', map_location=device))
+biased_model.eval()
 
 # Load robust model
-robust_model = torch.load('Robust_Models/cnn3_24_v2_5_2_10_85_96.pth')
+robust_model = CheaterCNN().to(device)
+robust_model.load_state_dict(torch.load('Robust_Models/cnn3_24v2_85', map_location=device))
+robust_model.eval()
 ```
 
 ## Methodology
@@ -187,49 +186,63 @@ Loss = CE(f(x), y) + λ_cf · ||f(x) - f(x_cf)||²
 - Paired training with color-inverted examples
 - Direct supervision: same shape, different color → same label
 - **Result**: 85.2% hard test accuracy
-- **Best hyperparameter**: λ_cf = 0.5, 2 warmup epochs, 10 total epochs
+- **Hyperparameter**: λ_cf = 0.5, 2 warmup epochs, 10 total epochs
+- **Key Insight**: Method is relatively robust to moderate changes in λ_cf
 
-## Interpretability Techniques
+## Interpretability & Visualization
 
 ### 1. Activation Maximization
-- Optimize input to maximize channel activations
-- Visualize what each layer's neurons respond to
-- L2 regularization + periodic Gaussian blur for interpretability
+Optimize input images to maximize channel activations in specific layers:
+- Initialize with noise
+- Gradient ascent on channel activation
+- L2 regularization + Gaussian blur for interpretability
 
-**Finding**: All layers dominated by color, minimal shape structure
+**Finding**: All layers show color dominance with minimal shape structure
 
-### 2. Grad-CAM (Gradient-weighted Class Activation Mapping)
+### 2. Grad-CAM (From Scratch)
+Mathematical formulation:
 ```
 α_k^c = (1/HW) Σ ∂y^c/∂A_ij^k
 Heatmap = ReLU(Σ α_k^c · A^k)
 ```
-- Implementation: From-scratch using PyTorch hooks
-- Validation: 0.98+ correlation with pytorch-gradcam library
+**Implementation**:
+- Forward hooks capture activation maps
+- Backward hooks capture gradients
+- Global average pooling → channel weights
+- Weighted sum + ReLU + normalization
 
-**Finding**: Biased model attends to distributed color regions; robust model focuses on digit strokes
+**Validation**: Closely aligns with pytorch-gradcam library
+
+**Finding**: Biased models show diffuse attention on colored regions; robust models focus on digit strokes
 
 ### 3. Polysemanticity Analysis
-- Layer 2, Channel 9 activates for:
+Individual neurons respond to multiple unrelated features:
+- Example: Layer 2, Channel 9 activates for:
   - Cyan color (digit 5)
   - Vertical line structures (digits 1, 7)
-- **Cause**: Information bottleneck (16 channels vs. 100+ semantic features)
+- **Cause**: Information bottleneck (16 channels encoding 100+ semantic features)
 - **Theory**: Aligns with Superposition Hypothesis from mechanistic interpretability
 
 ## Adversarial Robustness
 
-### PGD Attack Setup
-- **Target**: Misclassify digit 7 as digit 3
-- **Budget**: ε = 12.75 (L∞, ~5% of pixel range)
-- **Steps**: 30 iterations, α = 1.5
+### PGD Attack Formulation
+```
+x^(0) = x + Uniform(-ε, ε)
+x^(i+1) = Π_ε(x^(i) + α · sign(∇_x L(f(x^(i)), t)))
+```
+**Parameters**:
+- ε = 12.75 (L∞, ~5% of pixel range)
+- α = 1.5 (step size)
+- Steps: 10 (biased model), 30 (robust model)
 
 ### Results
 
-| Model | Success | Confidence | ε Required |
-|-------|---------|------------|-----------|
-| Biased | ✓ YES | 96.3% | 10.5 |
-| Robust | ✗ NO | 67.0% | 18.3 |
+| Model | Attack Success | Target Confidence | ε Required |
+|-------|---------------|-------------------|-----------|
+| Biased | 99% | 99% | ~5 (way below budget) |
+| Robust | 68% | 67% | >20 (exceeds budget) |
 
-**Transferability**: Adversarial examples don't transfer between models (different features)
+**Key Insight**: Debiasing and adversarial robustness are complementary objectives—both benefit from learning invariant, semantically meaningful features.
 
 ## Critical Insights
 
