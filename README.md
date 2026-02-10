@@ -246,81 +246,41 @@ x^(i+1) = Π_ε(x^(i) + α · sign(∇_x L(f(x^(i)), t)))
 
 ## Critical Insights
 
-### 1. The Nature of Shortcut Learning
-- Biased model: 24.3% on hard test (worse than random!)
-- Reason: Model learns P(ŷ=c \| color=c) ≈ 0.95, but hard test inverts correlation
-- **Real-world implication**: Models performing well on biased validation can catastrophically fail
+### The Nature of Shortcut Learning
+Biased model achieves 24.3% on hard test set—**worse than random chance (10%)**. The model learns P(ŷ=c | color=c) ≈ 0.95 on training data, but hard test inverts this correlation. This demonstrates a critical failure mode in real-world deployments where models performing well on biased validation sets can catastrophically fail under distribution shift.
 
-### 2. Explicit > Implicit for Strong Biases
-- Regularization (gradient penalty) is indirect and weak
-- Counterfactual pairs provide explicit evidence
-- **Principle**: When bias is 95%, models need proof it's wrong, not punishment for using it
+### Explicit > Implicit for Strong Biases
+When spurious correlations are extremely strong (95%):
+- Regularization methods provide indirect, weak signals
+- Counterfactual pairs offer explicit evidence
+- **Principle**: Models need proof that shortcuts are incorrect, not merely punishment for using them
 
-### 3. Polysemanticity Under Capacity Constraints
-- Information bottleneck creates multiplexed representations
-- No disentangled semantic features
-- Suggests architectures need sufficient capacity OR explicit constraints (counterfactuals)
-
-## Technical Details
-
-### Grad-CAM Implementation Highlights
-- **Forward hook**: Capture activation maps A^k at target layer
-- **Backward hook**: Capture gradients ∂y^c/∂A^k during backprop
-- **Pooling**: Global average of gradients → channel importance weights
-- **Upsampling**: Bilinear interpolation to input resolution
-
-### Counterfactual Dataset Generation
-```python
-# For each training sample (x, y):
-x_colored = apply_biased_color(x, y)      # 95% rule
-x_cf = apply_random_color(x)              # Any random color
-# Train to minimize: ||f(x_colored) - f(x_cf)||²
-```
+### Polysemanticity Under Capacity Constraints
+With only 16 channels but 100+ semantic features to encode:
+- Neurons multiplex representations
+- No clean disentanglement of features
+- Suggests architectures need sufficient capacity OR explicit invariance constraints
 
 ## Limitations & Future Work
 
-### Limitations
-- Single architecture tested (CheaterCNN)
+**Current Limitations**:
+- Single architecture tested (CheaterCNN, 8-16-16 channels)
 - Low-resolution dataset (28×28 MNIST)
-- Limited hyperparameter search
-- Mostly empirical observations
+- Limited hyperparameter exploration
+- Primarily empirical observations
 
-### Future Directions
-- Scale to CIFAR-10, CelebA, medical imaging
-- Formalize counterfactual training theory
+**Future Directions**:
+- Scale to complex datasets (CIFAR-10, CelebA, medical imaging)
+- Formalize counterfactual training theory with PAC-learning guarantees
 - Sparse autoencoders for polysemanticity decomposition
-- Certified robustness guarantees
-- Group DRO, EIIL, and other advanced debiasing methods
+- Certified robustness analysis (randomized smoothing)
+- Advanced debiasing: Group DRO, EIIL, Concept Bottleneck Models
 
 ## References
 
-Key papers this work builds on:
-
-1. **Geirhos et al. (2020)** - Shortcut Learning in Deep Neural Networks
-2. **Selvaraju et al. (2017)** - Grad-CAM: Visual Explanations
+1. **Geirhos et al. (2020)** - Shortcut Learning in Deep Neural Networks (Nature MI)
+2. **Selvaraju et al. (2017)** - Grad-CAM: Visual Explanations from Deep Networks (ICCV)
 3. **Arjovsky et al. (2019)** - Invariant Risk Minimization
-4. **Sagawa et al. (2020)** - Distributionally Robust Neural Networks
-5. **Anthropic (2022)** - Toy Models of Superposition (mechanistic interpretability)
-
-## Citation
-
-If you use this work, please cite:
-
-```bibtex
-@assignment{precog2026,
-  title={Biased Model Analysis: Understanding and Mitigating Spurious Correlations in CNNs},
-  author={Saketh},
-  year={2026},
-  institution={PreCog Research Group}
-}
-```
-
-## Contact & Discussion
-
-For questions or discussion about specific implementations, please refer to the individual Jupyter notebooks which contain detailed comments and experimental logs.
-
----
-
-**Last Updated**: February 9, 2026  
-**Status**: Complete ✅  
-**Total Effort**: 7 comprehensive tasks, 6 Jupyter notebooks, 1000+ line technical report
+4. **Sagawa et al. (2020)** - Distributionally Robust Neural Networks (ICLR)
+5. **Madry et al. (2018)** - Towards Deep Learning Models Resistant to Adversarial Attacks (ICLR)
+6. **Anthropic (2022)** - Toy Models of Superposition (Mechanistic Interpretability)
